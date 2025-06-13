@@ -7,6 +7,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useWalk } from '@/contexts/WalkContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 const { width, height } = Dimensions.get('window');
 
@@ -21,6 +22,15 @@ export default function HomeScreen() {
   const [currentLocation, setCurrentLocation] = useState<LocationCoords | null>(null);
   const [locationPermission, setLocationPermission] = useState<boolean>(false);
   const colorScheme = useColorScheme();
+
+  // Theme colors
+  const backgroundColor = useThemeColor({}, 'background');
+  const textColor = useThemeColor({}, 'text');
+  const secondaryTextColor = useThemeColor({}, 'secondaryText');
+  const tintColor = useThemeColor({}, 'tint');
+  const errorColor = useThemeColor({}, 'error');
+  const shadowColor = useThemeColor({}, 'shadow');
+  const cardBackground = useThemeColor({}, 'cardBackground');
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -48,6 +58,12 @@ export default function HomeScreen() {
 
   const requestLocationPermission = async () => {
     try {
+      // First check if we already have permission
+      const { status: existingStatus } = await Location.getForegroundPermissionsAsync();
+      
+
+
+      // Request permission
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert(
@@ -138,7 +154,7 @@ export default function HomeScreen() {
         {isWalking && routePoints.length > 1 && (
           <Polyline
             coordinates={routePoints}
-            strokeColor="#007AFF"
+            strokeColor={tintColor}
             strokeWidth={4}
             lineCap="round"
             lineJoin="round"
@@ -149,14 +165,14 @@ export default function HomeScreen() {
 
       {isWalking && (
         <View style={styles.recordingOverlay}>
-          <ThemedView style={styles.recordingContainer}>
+          <ThemedView style={[styles.recordingContainer, { backgroundColor: cardBackground, shadowColor }]}>
             <View style={styles.recordingRow}>
               <View style={styles.recordingIndicator}>
-                <View style={styles.redDot} />
-                <ThemedText style={styles.recordingText}>Recording Walk</ThemedText>
+                <View style={[styles.redDot, { backgroundColor: errorColor }]} />
+                <ThemedText style={[styles.recordingText, { color: errorColor }]}>Recording Walk</ThemedText>
               </View>
               
-              <ThemedText style={styles.timerText}>
+              <ThemedText style={[styles.timerText, { color: textColor }]}>
                 {formatDuration(walkDuration)}
               </ThemedText>
             </View>
@@ -175,6 +191,36 @@ const styles = StyleSheet.create({
     width: width,
     height: height,
   },
+  permissionContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  permissionTitle: {
+    textAlign: 'center',
+    marginTop: 20,
+    marginBottom: 15,
+  },
+  permissionText: {
+    textAlign: 'center',
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 30,
+  },
+  permissionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+  },
+  permissionButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
   overlay: {
     position: 'absolute',
     top: 60,
@@ -182,10 +228,8 @@ const styles = StyleSheet.create({
     right: 20,
   },
   welcomeContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -196,12 +240,10 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     textAlign: 'center',
-    color: '#333',
     marginBottom: 4,
   },
   subtitleText: {
     textAlign: 'center',
-    color: '#666',
     fontSize: 14,
   },
   recordingOverlay: {
@@ -211,10 +253,8 @@ const styles = StyleSheet.create({
     right: 20,
   },
   recordingContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 12,
     padding: 20,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -236,18 +276,15 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#ff4444',
     marginRight: 8,
   },
   recordingText: {
-    color: '#ff4444',
     fontWeight: 'bold',
     fontSize: 14,
   },
   timerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
   },
   stopButton: {
     flexDirection: 'row',
@@ -276,7 +313,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 25,
-    shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,

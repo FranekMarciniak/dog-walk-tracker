@@ -5,8 +5,8 @@ import MapView, { Marker, Polyline } from 'react-native-maps';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { databaseService, RoutePoint, Walk } from '@/services/database';
 
 const { width } = Dimensions.get('window');
@@ -18,6 +18,14 @@ export default function WalkDetailScreen() {
   const [routePoints, setRoutePoints] = useState<RoutePoint[]>([]);
   const [loading, setLoading] = useState(true);
   const colorScheme = useColorScheme();
+
+  // Theme colors
+  const backgroundColor = useThemeColor({}, 'screenBackground');
+  const cardBackground = useThemeColor({}, 'cardBackground');
+  const textColor = useThemeColor({}, 'text');
+  const secondaryTextColor = useThemeColor({}, 'secondaryText');
+  const tintColor = useThemeColor({}, 'tint');
+  const shadowColor = useThemeColor({}, 'shadow');
 
   useEffect(() => {
     if (id) {
@@ -73,7 +81,7 @@ export default function WalkDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor }]}>
         <View style={styles.header}>
           <ThemedText type="title">Loading...</ThemedText>
         </View>
@@ -83,7 +91,7 @@ export default function WalkDetailScreen() {
 
   if (!walk) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor }]}>
         <View style={styles.header}>
           <ThemedText type="title">Walk not found</ThemedText>
         </View>
@@ -127,7 +135,7 @@ export default function WalkDetailScreen() {
   }));
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor }]}>
       <MapView
         style={styles.map}
         region={getMapRegion()}
@@ -163,7 +171,7 @@ export default function WalkDetailScreen() {
         {polylineCoordinates.length > 1 && (
           <Polyline
             coordinates={polylineCoordinates}
-            strokeColor={Colors[colorScheme ?? 'light'].tint}
+            strokeColor={tintColor}
             strokeWidth={4}
             lineJoin="round"
             lineCap="round"
@@ -171,31 +179,31 @@ export default function WalkDetailScreen() {
         )}
       </MapView>
 
-      <ScrollView style={styles.infoPanel}>
-        <ThemedView style={styles.walkInfo}>
-          <ThemedText type="subtitle" style={styles.walkDate}>
+      <ScrollView style={[styles.infoPanel, { backgroundColor }]}>
+        <ThemedView style={[styles.walkInfo, { backgroundColor: cardBackground, shadowColor }]}>
+          <ThemedText type="subtitle" style={[styles.walkDate, { color: textColor }]}>
             {formatDate(walk.createdAt)}
           </ThemedText>
           
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
-              <ThemedText style={styles.statLabel}>Duration</ThemedText>
-              <ThemedText style={styles.statValue}>{formatDuration(walk.duration)}</ThemedText>
+              <ThemedText style={[styles.statLabel, { color: secondaryTextColor }]}>Duration</ThemedText>
+              <ThemedText style={[styles.statValue, { color: textColor }]}>{formatDuration(walk.duration)}</ThemedText>
             </View>
             
             <View style={styles.statItem}>
-              <ThemedText style={styles.statLabel}>Distance</ThemedText>
-              <ThemedText style={styles.statValue}>{formatDistance(walk.distance)}</ThemedText>
+              <ThemedText style={[styles.statLabel, { color: secondaryTextColor }]}>Distance</ThemedText>
+              <ThemedText style={[styles.statValue, { color: textColor }]}>{formatDistance(walk.distance)}</ThemedText>
             </View>
             
             <View style={styles.statItem}>
-              <ThemedText style={styles.statLabel}>Route Points</ThemedText>
-              <ThemedText style={styles.statValue}>{routePoints.length}</ThemedText>
+              <ThemedText style={[styles.statLabel, { color: secondaryTextColor }]}>Route Points</ThemedText>
+              <ThemedText style={[styles.statValue, { color: textColor }]}>{routePoints.length}</ThemedText>
             </View>
             
             <View style={styles.statItem}>
-              <ThemedText style={styles.statLabel}>Avg Speed</ThemedText>
-              <ThemedText style={styles.statValue}>
+              <ThemedText style={[styles.statLabel, { color: secondaryTextColor }]}>Avg Speed</ThemedText>
+              <ThemedText style={[styles.statValue, { color: textColor }]}>
                 {walk.distance && walk.duration > 0 
                   ? `${((walk.distance / 1000) / (walk.duration / 3600)).toFixed(1)} km/h`
                   : 'N/A'
@@ -212,39 +220,32 @@ export default function WalkDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
-  header:{
-    flexDirection: 'row',
+  header: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    paddingTop: 20,
-    backgroundColor: 'white',
-    shadowColor: '#000',
+  },
+  map: {
+    width: width,
+    height: '60%',
+  },
+  infoPanel: {
+    flex: 1,
+    padding: 20,
+  },
+  walkInfo: {
+    borderRadius: 12,
+    padding: 20,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  backButton: {
-    marginRight: 15,
-    padding: 5,
-  },
-  map: {
-    flex: 1,
-    width: width,
-  },
-  infoPanel: {
-    maxHeight: 200,
-    backgroundColor: 'white',
-  },
-  walkInfo: {
-    padding: 20,
-  },
   walkDate: {
     textAlign: 'center',
     marginBottom: 20,
-    color: '#fff',
   },
   statsGrid: {
     flexDirection: 'row',
@@ -254,21 +255,14 @@ const styles = StyleSheet.create({
   statItem: {
     width: '48%',
     alignItems: 'center',
-    padding: 15,
-    backgroundColor: 'rgba(0, 0, 0, 0.02)',
-    borderRadius: 8,
-    marginBottom: 10,
+    marginBottom: 20,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
+    fontSize: 14,
     marginBottom: 5,
   },
   statValue: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
   },
 }); 

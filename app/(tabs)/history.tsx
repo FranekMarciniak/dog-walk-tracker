@@ -1,8 +1,8 @@
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { databaseService, Walk } from '@/services/database';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -21,6 +21,18 @@ export default function HistoryScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const colorScheme = useColorScheme();
   const router = useRouter();
+
+  // Theme colors
+  const backgroundColor = useThemeColor({}, 'screenBackground');
+  const textColor = useThemeColor({}, 'text');
+  const secondaryTextColor = useThemeColor({}, 'secondaryText');
+  const tertiaryTextColor = useThemeColor({}, 'tertiaryText');
+  const cardBackground = useThemeColor({}, 'cardBackground');
+  const tintColor = useThemeColor({}, 'tint');
+  const errorColor = useThemeColor({}, 'error');
+  const shadowColor = useThemeColor({}, 'shadow');
+  const placeholderColor = useThemeColor({}, 'placeholder');
+  const iconColor = useThemeColor({}, 'icon');
 
   const loadWalks = useCallback(async () => {
     try {
@@ -150,7 +162,7 @@ export default function HistoryScreen() {
 
     return (
       <Animated.View style={[styles.walkItemContainer, { opacity }]}>
-        <View style={styles.deleteBackground}>
+        <View style={[styles.deleteBackground, { backgroundColor: errorColor }]}>
           <IconSymbol size={24} name="trash" color="#fff" />
           <ThemedText style={styles.deleteText}>Delete</ThemedText>
         </View>
@@ -159,30 +171,31 @@ export default function HistoryScreen() {
           onGestureEvent={onGestureEvent}
           onHandlerStateChange={onHandlerStateChange}
         >
-          <Animated.View style={[styles.walkItemAnimated, { transform: [{ translateX }] }]}>
+                    <Animated.View style={[styles.walkItemAnimated, { backgroundColor: cardBackground, transform: [{ translateX }] }]}>
             <Pressable 
               style={({ pressed }) => [
                 styles.walkItem,
+                { backgroundColor: cardBackground, shadowColor },
                 pressed && styles.walkItemPressed
               ]} 
               onPress={() => handleWalkPress(walk.id!)}
             >
-              <View style={styles.walkItemContent}>
+              <View style={[styles.walkItemContent, { backgroundColor: cardBackground }]}>
                 <View style={styles.walkHeader}>
-                  <IconSymbol size={20} name="figure.walk" color={Colors[colorScheme ?? 'light'].tint} />
-                  <ThemedText style={styles.walkDate}>{formatDate(walk.createdAt)}</ThemedText>
-                  <IconSymbol size={16} name="chevron.right" color="#999" style={styles.chevron} />
+                  <IconSymbol size={20} name="figure.walk" color={tintColor} />
+                  <ThemedText style={[styles.walkDate, { color: textColor }]}>{formatDate(walk.createdAt)}</ThemedText>
+                  <IconSymbol size={16} name="chevron.right" color={tertiaryTextColor} style={styles.chevron} />
                 </View>
                 
                 <View style={styles.walkStats}>
                   <View style={styles.statItem}>
-                    <ThemedText style={styles.statLabel}>Duration</ThemedText>
-                    <ThemedText style={styles.statValue}>{formatDuration(walk.duration)}</ThemedText>
+                    <ThemedText style={[styles.statLabel, { color: secondaryTextColor }]}>Duration</ThemedText>
+                    <ThemedText style={[styles.statValue, { color: textColor }]}>{formatDuration(walk.duration)}</ThemedText>
                   </View>
                   
                   <View style={styles.statItem}>
-                    <ThemedText style={styles.statLabel}>Distance</ThemedText>
-                    <ThemedText style={styles.statValue}>{formatDistance(walk.distance)}</ThemedText>
+                    <ThemedText style={[styles.statLabel, { color: secondaryTextColor }]}>Distance</ThemedText>
+                    <ThemedText style={[styles.statValue, { color: textColor }]}>{formatDistance(walk.distance)}</ThemedText>
                   </View>
                 </View>
               </View>
@@ -195,7 +208,7 @@ export default function HistoryScreen() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor }]}>
         <View style={styles.centerContent}>
           <ThemedText>Loading walk history...</ThemedText>
         </View>
@@ -205,7 +218,7 @@ export default function HistoryScreen() {
 
   return (
     <ScrollView 
-      style={styles.container}
+      style={[styles.container, { backgroundColor }]}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
@@ -213,50 +226,50 @@ export default function HistoryScreen() {
       <View style={styles.header}>
         <IconSymbol
           size={80}
-          color="black"
+          color={textColor}
           name="clock.fill"
           style={styles.headerIcon}
         />
-        <ThemedText type="title" style={styles.title}>Walk History</ThemedText>
+        <ThemedText type="title" style={[styles.title, { color: textColor }]}>Walk History</ThemedText>
       </View>
 
       {/* Overall Statistics */}
-      <ThemedView style={styles.statsContainer}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>Overall Statistics</ThemedText>
+      <ThemedView style={[styles.statsContainer, { backgroundColor: cardBackground, shadowColor }]}>
+        <ThemedText type="subtitle" style={[styles.sectionTitle, { color: textColor }]}>Overall Statistics</ThemedText>
         
         <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
-            <ThemedText style={styles.statNumber}>{stats.totalWalks}</ThemedText>
-            <ThemedText style={styles.statLabel}>Total Walks</ThemedText>
+          <View style={[styles.statCard, { backgroundColor: cardBackground }]}>
+            <ThemedText style={[styles.statNumber, { color: textColor }]}>{stats.totalWalks}</ThemedText>
+            <ThemedText style={[styles.statLabel, { color: secondaryTextColor }]}>Total Walks</ThemedText>
           </View>
           
-          <View style={styles.statCard}>
-            <ThemedText style={styles.statNumber}>{formatDuration(stats.totalDuration)}</ThemedText>
-            <ThemedText style={styles.statLabel}>Total Time</ThemedText>
+          <View style={[styles.statCard, { backgroundColor: cardBackground }]}>
+            <ThemedText style={[styles.statNumber, { color: textColor }]}>{formatDuration(stats.totalDuration)}</ThemedText>
+            <ThemedText style={[styles.statLabel, { color: secondaryTextColor }]}>Total Time</ThemedText>
           </View>
           
-          <View style={styles.statCard}>
-            <ThemedText style={styles.statNumber}>{formatDistance(stats.totalDistance)}</ThemedText>
-            <ThemedText style={styles.statLabel}>Total Distance</ThemedText>
+          <View style={[styles.statCard, { backgroundColor: cardBackground }]}>
+            <ThemedText style={[styles.statNumber, { color: textColor }]}>{formatDistance(stats.totalDistance)}</ThemedText>
+            <ThemedText style={[styles.statLabel, { color: secondaryTextColor }]}>Total Distance</ThemedText>
           </View>
           
-          <View style={styles.statCard}>
-            <ThemedText style={styles.statNumber}>{formatDuration(Math.round(stats.averageDuration))}</ThemedText>
-            <ThemedText style={styles.statLabel}>Avg Duration</ThemedText>
+          <View style={[styles.statCard, { backgroundColor: cardBackground }]}>
+            <ThemedText style={[styles.statNumber, { color: textColor }]}>{formatDuration(Math.round(stats.averageDuration))}</ThemedText>
+            <ThemedText style={[styles.statLabel, { color: secondaryTextColor }]}>Avg Duration</ThemedText>
           </View>
         </View>
       </ThemedView>
 
       {/* Recent Walks */}
-      <ThemedView style={styles.section}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>Recent Walks</ThemedText>
-        <ThemedText style={styles.sectionSubtitle}>Tap to view route • Swipe left to delete</ThemedText>
+      <ThemedView style={[styles.section, { backgroundColor: cardBackground, shadowColor }]}>
+        <ThemedText type="subtitle" style={[styles.sectionTitle, { color: textColor }]}>Recent Walks</ThemedText>
+        <ThemedText style={[styles.sectionSubtitle, { color: secondaryTextColor }]}>Tap to view route • Swipe left to delete</ThemedText>
         
         {walks.length === 0 ? (
           <View style={styles.emptyState}>
-            <IconSymbol size={60} name="figure.walk" color="#ccc" />
-            <ThemedText style={styles.emptyText}>No walks recorded yet</ThemedText>
-            <ThemedText style={styles.emptySubtext}>Start your first walk to see it here!</ThemedText>
+            <IconSymbol size={60} name="figure.walk" color={placeholderColor} />
+            <ThemedText style={[styles.emptyText, { color: secondaryTextColor }]}>No walks recorded yet</ThemedText>
+            <ThemedText style={[styles.emptySubtext, { color: tertiaryTextColor }]}>Start your first walk to see it here!</ThemedText>
           </View>
         ) : (
           walks.map((walk) => <SwipeableWalkItem key={walk.id} walk={walk} />)
@@ -269,7 +282,6 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   centerContent: {
     flex: 1,
@@ -286,13 +298,11 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    color: '#333',
   },
   statsContainer: {
     margin: 20,
     padding: 20,
     borderRadius: 12,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -303,7 +313,6 @@ const styles = StyleSheet.create({
     marginTop: 0,
     padding: 20,
     borderRadius: 12,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -311,11 +320,9 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginBottom: 16,
-    color: '#fff',
   },
   sectionSubtitle: {
     fontSize: 14,
-    color: '#fff',
     marginBottom: 15,
   },
   statsGrid: {
@@ -327,19 +334,16 @@ const styles = StyleSheet.create({
     width: '48%',
     alignItems: 'center',
     padding: 15,
-    backgroundColor: '#fff',
     borderRadius: 8,
     marginBottom: 10,
   },
   statNumber: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
     marginBottom: 5,
   },
   statLabel: {
     fontSize: 12,
-    color: '#666',
     textAlign: 'center',
   },
   walkItemContainer: {
@@ -351,7 +355,6 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    backgroundColor: '#ff4444',
     justifyContent: 'center',
     alignItems: 'center',
     width: 100,
@@ -364,14 +367,11 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   walkItemAnimated: {
-    backgroundColor: 'white',
     borderRadius: 8,
   },
   walkItem: {
     borderRadius: 8,
     overflow: 'hidden',
-    backgroundColor: 'white',
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -382,7 +382,6 @@ const styles = StyleSheet.create({
   },
   walkItemContent: {
     padding: 15,
-    backgroundColor: 'white',
   },
   walkHeader: {
     flexDirection: 'row',
@@ -393,7 +392,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
     flex: 1,
   },
   chevron: {
@@ -409,7 +407,6 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
     marginTop: 2,
   },
   emptyState: {
@@ -419,13 +416,11 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#666',
     marginTop: 15,
     marginBottom: 5,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#999',
     textAlign: 'center',
   },
 }); 

@@ -5,14 +5,23 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
-import { Colors } from '@/constants/Colors';
 import { useWalk } from '@/contexts/WalkContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default function AddScreen() {
   const { isWalking, startWalk, stopWalk, walkStartTime } = useWalk();
   const [walkDuration, setWalkDuration] = useState(0);
   const colorScheme = useColorScheme();
+
+  // Theme colors
+  const backgroundColor = useThemeColor({}, 'screenBackground');
+  const textColor = useThemeColor({}, 'text');
+  const secondaryTextColor = useThemeColor({}, 'secondaryText');
+  const tintColor = useThemeColor({}, 'tint');
+  const errorColor = useThemeColor({}, 'error');
+  const shadowColor = useThemeColor({}, 'shadow');
+  const placeholderColor = useThemeColor({}, 'placeholder');
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -50,11 +59,11 @@ export default function AddScreen() {
 
   if (isWalking) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor }]}>
         <View style={styles.walkingContainer}>
           <IconSymbol
             size={120}
-            color={Colors[colorScheme ?? 'light'].tint}
+            color={tintColor}
             name="figure.walk"
             style={styles.walkingIcon}
           />
@@ -67,7 +76,7 @@ export default function AddScreen() {
           </ThemedView>
 
           <Pressable
-            style={[styles.actionButton, { backgroundColor: '#ff4444' }]}
+            style={[styles.actionButton, { backgroundColor: errorColor, shadowColor }]}
             onPress={handlePress}
           >
             <AntDesign name="pause" size={32} color="white" />
@@ -75,7 +84,7 @@ export default function AddScreen() {
           </Pressable>
 
           <ThemedView style={styles.infoContainer}>
-            <ThemedText style={styles.infoText}>
+            <ThemedText style={[styles.infoText, { color: secondaryTextColor }]}>
               Your walk is being tracked. Tap the button above to stop recording.
             </ThemedText>
           </ThemedView>
@@ -85,11 +94,11 @@ export default function AddScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor }]}>
       <View style={styles.centerContent}>
         <IconSymbol
           size={120}
-          color="#808080"
+          color={placeholderColor}
           name="plus.circle.fill"
           style={styles.headerImage}
         />
@@ -98,10 +107,10 @@ export default function AddScreen() {
           <ThemedText type="title">Start New Walk</ThemedText>
         </ThemedView>
         
-        <ThemedText style={styles.subtitle}>Ready to take your dog for a walk?</ThemedText>
+        <ThemedText style={[styles.subtitle, { color: secondaryTextColor }]}>Ready to take your dog for a walk?</ThemedText>
         
         <Pressable
-          style={[styles.actionButton, { backgroundColor: Colors[colorScheme ?? 'light'].tint }]}
+          style={[styles.actionButton, { backgroundColor: tintColor, shadowColor }]}
           onPress={handlePress}
         >
           <AntDesign name="plus" size={32} color="white" />
@@ -110,9 +119,9 @@ export default function AddScreen() {
 
         <ThemedView style={styles.stepContainer}>
           <ThemedText type="subtitle">What we'll track:</ThemedText>
-          <ThemedText style={styles.featureText}>• Route and distance</ThemedText>
-          <ThemedText style={styles.featureText}>• Duration</ThemedText>
-          <ThemedText style={styles.featureText}>• Average pace</ThemedText>
+          <ThemedText style={[styles.featureText, { color: secondaryTextColor }]}>• Route and distance</ThemedText>
+          <ThemedText style={[styles.featureText, { color: secondaryTextColor }]}>• Duration</ThemedText>
+          <ThemedText style={[styles.featureText, { color: secondaryTextColor }]}>• Average pace</ThemedText>
         </ThemedView>
       </View>
     </View>
@@ -122,47 +131,43 @@ export default function AddScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   centerContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 20,
   },
   walkingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 20,
   },
   headerImage: {
-    marginBottom: 20,
+    marginBottom: 30,
   },
   walkingIcon: {
     marginBottom: 30,
   },
   titleContainer: {
-    backgroundColor: 'transparent',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 30,
+    alignItems: 'center',
+    marginBottom: 20,
   },
   walkingTitle: {
     textAlign: 'center',
     marginBottom: 10,
-    color: '#333',
+  },
+  subtitle: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 40,
   },
   durationText: {
     textAlign: 'center',
     fontSize: 48,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 20,
+    fontFamily: 'monospace',
   },
   actionButton: {
     flexDirection: 'row',
@@ -171,15 +176,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 25,
-    marginBottom: 30,
-    shadowColor: '#000',
+    marginVertical: 30,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 3,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.27,
+    shadowRadius: 4.65,
+    elevation: 6,
   },
   buttonText: {
     color: 'white',
@@ -187,39 +191,32 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 10,
   },
-  statsContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 20,
-    padding: 30,
-    marginBottom: 30,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  infoContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 12,
-    padding: 20,
-    marginTop: 20,
-  },
-  infoText: {
-    textAlign: 'center',
-    color: '#666',
-  },
   stepContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 30,
     padding: 20,
-    width: '100%',
+    borderRadius: 12,
   },
   featureText: {
-    color: '#666',
-    marginLeft: 10,
-    marginVertical: 2,
+    fontSize: 16,
+    marginVertical: 4,
+    textAlign: 'center',
+  },
+  statsContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+    padding: 20,
+    borderRadius: 12,
+  },
+  infoContainer: {
+    marginTop: 20,
+    padding: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  infoText: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
   },
 }); 
